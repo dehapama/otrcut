@@ -500,6 +500,8 @@ elif echo "$film_ohne_anfang" | grep -q ".mpg.avi"; then	#Wenn es sich um eine "
 	format=avi
 	echo -e "${blau}avi${normal}"
 fi
+CUTLIST=$(basename $film).cutlist	#Filmname ohne Pfad
+
 
 if [ $format = mkv ]; then
 	echo -e "${rot}MKVs können nicht bearbeitet werden, überspringe Video!${normal}"
@@ -1030,7 +1032,7 @@ let cut_anzahl=$(cat $tmp/$CUTLIST | grep "NoOfCuts" | cut -d"=" -f2 | tr -d "\r
 echo "####Auflistung der Cuts####"
 if [ "$format" == "zeit" ]; then	#Wenn das verwendete Format "Zeit" ist
 	let head1=1
-	echo "Es müssen $cut_anzahl Cuts umgerechnet werden."
+	echo "Es müssen $cut_anzahl Cuts (Zeit) umgerechnet werden."
 	while [ "$cut_anzahl" -gt "0" ]; do
 		#Die Sekunde in der der Cut beginnen soll
 		let time_seconds_start=$(cat $tmp/$CUTLIST | grep "Start=" | cut -d"=" -f2 | head -n$head1 | tail -n1 | cut -d"." -f1 | tr -d "\r")
@@ -1048,7 +1050,7 @@ if [ "$format" == "zeit" ]; then	#Wenn das verwendete Format "Zeit" ist
 	done
 elif [ "$format" == "frames" ]; then	#Wenn das verwendete Format "Frames" ist
 	let head1=1
-	echo "Es müssen $cut_anzahl Cuts umgerechnet werden."
+	echo "Es müssen $cut_anzahl Cuts (Frames) umgerechnet werden."
 	while [ $cut_anzahl -gt 0 ]; do
 		#Der Frame bei dem der Cut beginnt
         	let startframe=$(cat $tmp/$CUTLIST | grep "StartFrame=" | cut -d= -f2 | head -n$head1 | tail -n1 | tr -d "\r")
@@ -1163,7 +1165,7 @@ else
 	fi
 fi
 }
-
+1
 #Hier wird nun, fals avidemux gewählt wurde, avidemux gestartet
 function demux ()
 {
@@ -1499,6 +1501,7 @@ fi
 #Hier werden nun die temporären Dateien gelöscht
 function del_tmp ()
 {
+    return
 if [ "$tmp" == "" ] || [ "$tmp" == "/" ] || [ "$tmp" == "/home" ]; then
 	echo -e "${rot}Achtung, bitte überprüfen Sie die Einstellung von \$tmp${normal}"
 	exit 1
@@ -1530,16 +1533,16 @@ software
            	local
        	fi
        	while true; do
-		#if [ "$UseLocalCutlist" == "no" ] || [ "$vorhanden" == "no" ] && [ "$continue" == "0" ]; then
-           		#load
-       		#fi
+		if [ "$UseLocalCutlist" == "no" ] || [ "$vorhanden" == "no" ] && [ "$continue" == "0" ]; then
+           		load
+       		fi
 		if [ "$continue" == "0" ]; then
 			decode
 			name
 		fi
-       		#if [ "$continue" == "0" ]; then
-         	#  	format
-		#fi
+       		if [ "$continue" == "0" ]; then
+         	  	format
+		fi
 		if [ "$continue" == "0" ]; then
          	  	which_fps
 		fi
@@ -1578,7 +1581,7 @@ software
                  		else
                     			continue=1
                  		fi
-              		fi
+              		fi 
            	fi
            	if [ "$overwrite" == "yes" ]; then
               		split
